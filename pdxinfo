@@ -1,0 +1,7 @@
+name=Crank-a-Sketch
+author=Alex
+description=Crank to sketch
+bundleID=com.alexwglenn.crankasketch
+version=0.1
+buildNumber=1
+imagePath=SystemAssets
