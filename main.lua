@@ -21,6 +21,11 @@ cursor:setImage(cursorImage)
 cursor:moveTo(200, 120)
 cursor:addSprite()
 
+local logoImage = gfx.image.new('images/logo')
+logoImage:draw(0, 0)
+
+splashTime = 60
+
 
 local angle = 0
 
@@ -87,6 +92,13 @@ function playdate.cranked(value)
   -- apply draw from current position to new
 end
 
+playdate.startAccelerometer()
+max_accel_x, max_accel_y, max_accel_z = playdate.readAccelerometer()
+max_accel_x += 1
+max_accel_y += 1
+max_accel_z += 1
+-- function playdate.acc
+
 local waveforms = { playdate.sound.kWaveSine,
    playdate.sound.kWaveSquare,
    playdate.sound.kWaveSawtooth,
@@ -111,9 +123,42 @@ runningSequence:setTempo(600)
 runningSequence:setLoops(0, runningSequence:getLength(), 0)
 runningSequence:play(complete)
 
+function lowerAlpha()
+  local newSegments = {}
+  for _, segment in ipairs(segments) do
+    segment.alpha += 0.1
+    if segment.alpha < 1 then
+      table.insert(newSegments, segment)
+    end
+  end
+  
+  segments = newSegments
+end
 
 segments = {}
 function playdate.update()
+  
+  accel_x, accel_y, accel_z = playdate.readAccelerometer()
+  accel_x += 1
+  accel_y += 1
+  accel_z += 1
+  if math.abs(accel_x - max_accel_x) + math.abs(accel_y - max_accel_y) +  math.abs(accel_z - max_accel_z) > 4 then
+    max_accel_x = accel_x
+    max_accel_y = accel_y
+    max_accel_z = accel_z
+    print("shake?")
+    lowerAlpha()
+  end
+  
+  if splashTime > 0 then
+    splashTime -= 1
+    if splashTime < 30 then
+      gfx.clear(gfx.kColorWhite)
+      gfx.setColor(gfx.kColorBlack)
+      logoImage:drawFaded(0, 0, splashTime / 30, gfx.image.kDitherTypeBayer8x8)
+    end
+    return
+  end
 
   dt = 1/20  
   
@@ -171,7 +216,7 @@ function playdate.update()
   
   if move_vec.x ~= 0.0 or move_vec.y ~= 0.0 then
     -- print("draw from "..cursor_x..", "..cursor_y.." to "..cursor.x..", "..cursor.y)
-    table.insert(segments, playdate.geometry.lineSegment.new(cursor_x, cursor_y, cursor_vec.x, cursor_vec.y))
+    table.insert(segments, {line=playdate.geometry.lineSegment.new(cursor_x, cursor_y, cursor_vec.x, cursor_vec.y), alpha=0})
   end
 
   arrow:setRotation(angle)
@@ -180,7 +225,8 @@ function playdate.update()
   gfx.setColor(gfx.kColorBlack)
   gfx.setLineWidth(2)
   for _, segment in ipairs(segments) do
-    gfx.drawLine(segment)
+    gfx.setDitherPattern(segment.alpha, gfx.image.kDitherTypeBayer8x8)
+    gfx.drawLine(segment.line)
   end
 
 end

@@ -4,4 +4,4 @@ description=Crank to sketch
 bundleID=com.alexwglenn.crankasketch
 version=0.1
 buildNumber=1
-imagePath=SystemAssets
+imagePath=images/card.png
