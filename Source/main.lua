@@ -26,6 +26,36 @@ logoImage:draw(0, 0)
 
 splashTime = 60
 
+function loadAndPlayMusic()
+  backgroundMusic = playdate.sound.sequence.new('music/runningloop.mid')
+  for index=1,backgroundMusic:getTrackCount() do
+    local synth = playdate.sound.synth.new(playdate.sound.kWaveSine)
+    track = backgroundMusic:getTrackAtIndex(index)
+    track:setInstrument(synth)
+  end
+  
+  backgroundMusic:setTempo(600)
+  backgroundMusic:setLoops(0, backgroundMusic:getLength(), 0)
+  backgroundMusic:play()
+end
+loadAndPlayMusic()
+
+function invertColors(inverted)
+  playdate.display.setInverted(inverted)
+end
+
+function musicPreference(enable)
+  if enable == true then
+    backgroundMusic:play()
+  else
+    backgroundMusic:stop()
+  end
+end
+local menu = playdate.getSystemMenu()
+menu:addCheckmarkMenuItem("Inverted", false, invertColors)
+menu:addCheckmarkMenuItem("Music", true, musicPreference)
+
+
 
 local angle = 0
 
@@ -99,30 +129,6 @@ max_accel_y += 1
 max_accel_z += 1
 -- function playdate.acc
 
-local waveforms = { playdate.sound.kWaveSine,
-   playdate.sound.kWaveSquare,
-   playdate.sound.kWaveSawtooth,
-   playdate.sound.kWaveTriangle,
-   playdate.sound.kWaveNoise,
-   playdate.sound.kWavePOPhase,
-   playdate.sound.kWavePODigital,
-   playdate.sound.kWavePOVosim}
-local waveIndex = 1
-runningSequence = playdate.sound.sequence.new('music/runningloop.mid')
-for index=1,runningSequence:getTrackCount() do
-  local synth = playdate.sound.synth.new(playdate.sound.kWaveSine)
-  track = runningSequence:getTrackAtIndex(index)
-  track:setInstrument(synth)
-end
--- print("track instrument "..track:getInstrument())
-print("sequence length: "..runningSequence:getLength().." tempo "..runningSequence:getTempo().." tracks "..runningSequence:getTrackCount())
-function complete()
-  print("sequence complete")
-end
-runningSequence:setTempo(600)
-runningSequence:setLoops(0, runningSequence:getLength(), 0)
-runningSequence:play(complete)
-
 function lowerAlpha()
   local newSegments = {}
   for _, segment in ipairs(segments) do
@@ -139,15 +145,17 @@ segments = {}
 function playdate.update()
   
   accel_x, accel_y, accel_z = playdate.readAccelerometer()
-  accel_x += 1
-  accel_y += 1
-  accel_z += 1
-  if math.abs(accel_x - max_accel_x) + math.abs(accel_y - max_accel_y) +  math.abs(accel_z - max_accel_z) > 4 then
-    max_accel_x = accel_x
-    max_accel_y = accel_y
-    max_accel_z = accel_z
-    print("shake?")
-    lowerAlpha()
+  if accel_x ~= nil and accel_y ~= nil and accel_z ~= nil then
+    accel_x += 1
+    accel_y += 1
+    accel_z += 1
+    if math.abs(accel_x - max_accel_x) + math.abs(accel_y - max_accel_y) +  math.abs(accel_z - max_accel_z) > 4 then
+      max_accel_x = accel_x
+      max_accel_y = accel_y
+      max_accel_z = accel_z
+      print("shake?")
+      lowerAlpha()
+    end
   end
   
   if splashTime > 0 then
