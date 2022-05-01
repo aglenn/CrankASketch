@@ -149,11 +149,10 @@ function playdate.update()
     accel_x += 1
     accel_y += 1
     accel_z += 1
-    if math.abs(accel_x - max_accel_x) + math.abs(accel_y - max_accel_y) +  math.abs(accel_z - max_accel_z) > 4 then
+    if math.abs(accel_x - max_accel_x) + math.abs(accel_y - max_accel_y) +  math.abs(accel_z - max_accel_z) > 2 then
       max_accel_x = accel_x
       max_accel_y = accel_y
       max_accel_z = accel_z
-      print("shake?")
       lowerAlpha()
     end
   end
